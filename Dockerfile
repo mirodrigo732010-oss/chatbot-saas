@@ -1,25 +1,22 @@
-FROM richarvey/nginx-php-fpm:latest
+FROM richarvey/nginx-php-fpm:3.1.9
 
-# Configurar variables
+# Configuración básica
 ENV WEBROOT /app/public
 ENV PHP_ERRORS_STDERR 1
 ENV RUN_SCRIPTS 1
 ENV REAL_IP_HEADER 1
 ENV SKIP_COMPOSER 1
 
-# Instalar extensiones de PHP necesarias para Laravel
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
-
 # Copiar archivos del proyecto
 COPY . .
 
-# Instalar dependencias de PHP
-RUN composer install --no-dev --optimize-autoloader
+# Instalar dependencias de PHP (sin compilar extensiones)
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 # Configurar permisos
-RUN chown -R www-data:www-data /app \
-    && chmod -R 755 /app/storage \
-    && chmod -R 755 /app/bootstrap/cache
+RUN chown -R www-www-data /app \
+    && chmod -R 777 /app/storage \
+    && chmod -R 777 /app/bootstrap/cache
 
-# Exponer puerto 80 (HTTP)
+# Exponer puerto HTTP
 EXPOSE 80
