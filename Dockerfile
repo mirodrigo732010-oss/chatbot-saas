@@ -1,29 +1,16 @@
-FROM php:8.3-fpm
+FROM richarvey/nginx-php-fpm:latest
 
-# Instalar extensiones de PHP necesarias
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    libzip-dev \
-    zip \
-    unzip
+# Configurar variables
+ENV WEBROOT /app/public
+ENV PHP_ERRORS_STDERR 1
+ENV RUN_SCRIPTS 1
+ENV REAL_IP_HEADER 1
+ENV SKIP_COMPOSER 1
 
-# Limpiar caché
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Instalar extensiones de PHP
+# Instalar extensiones de PHP necesarias para Laravel
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Instalar Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Establecer directorio de trabajo
-WORKDIR /app
-
-# Copiar archivos del proyecto (incluyendo public/build ya compilado)
+# Copiar archivos del proyecto
 COPY . .
 
 # Instalar dependencias de PHP
@@ -34,8 +21,5 @@ RUN chown -R www-data:www-data /app \
     && chmod -R 755 /app/storage \
     && chmod -R 755 /app/bootstrap/cache
 
-# Exponer puerto
-EXPOSE 9000
-
-# Comando para iniciar PHP-FPM
-CMD ["php-fpm"]
+# Exponer puerto 80 (HTTP)
+EXPOSE 80
